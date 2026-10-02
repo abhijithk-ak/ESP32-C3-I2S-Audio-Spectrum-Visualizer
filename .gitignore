@@ -1,0 +1,17 @@
+# Arduino and PlatformIO build output
+build/
+.pio/
+*.elf
+*.hex
+*.bin
+*.map
+*.o
+*.d
+*.a
+
+# Editor, operating system, and temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.orig
