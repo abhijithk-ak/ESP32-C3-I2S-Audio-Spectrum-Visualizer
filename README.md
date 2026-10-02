@@ -1,6 +1,6 @@
 # ESP32-C3 I2S Audio Spectrum Visualizer
 
-A mono audio spectrum visualizer for an ESP32-C3, an INMP441 I2S digital microphone, and a 128 x 64 SH1106 I2C OLED. It samples audio at 16 kHz, calculates a 512-point FFT, groups the spectrum into 32 logarithmically spaced bands, and draws one of four visualizations.
+A mono audio spectrum visualizer for an ESP32-C3, an INMP441 I2S digital microphone, and a 128 x 64 I2C OLED. It has been tested with a 0.96-inch SSD1306 OLED and a 1.3-inch SH1106 OLED. It samples audio at 16 kHz, calculates a 512-point FFT, groups the spectrum into 32 logarithmically spaced bands, and draws one of four visualizations.
 
 Suggested GitHub repository name: `esp32-c3-i2s-audio-spectrum-visualizer`.
 
@@ -52,7 +52,7 @@ Photos of the four display modes running on the OLED:
 
 - ESP32-C3 development board (the pin map below is the one in the sketch).
 - INMP441 I2S microphone breakout.
-- 128 x 64 I2C OLED using the SH1106 controller. The sketch instantiates the U8g2 SH1106 driver; an SSD1306-only display may not work correctly without changing that driver declaration.
+- 128 x 64 I2C OLED. Both a 0.96-inch SSD1306 module and a 1.3-inch SH1106 module have been tested with this project.
 - Jumper wires and a stable 3.3 V supply.
 
 The code's comments also refer to ESP32 generally, but the pinout and target named in the sketch are for an ESP32-C3. Other ESP32 boards may use different available pins, I2S support, or board settings; adjust and verify the configuration for the exact board.
@@ -74,6 +74,18 @@ The code's comments also refer to ESP32 generally, but the pinout and target nam
 
 Connect the ESP32, microphone, and OLED grounds together. Keep the microphone's I2S data connection digital; it is not an analog microphone input. Check the pin labels and voltage requirements for your particular breakout boards. GPIO2, GPIO8, and GPIO9 can have boot-strapping roles on ESP32-C3 variants, so check your board schematic if attached modules prevent booting.
 
+Both OLEDs use the same I2C wiring shown above. The source currently selects the SH1106 U8g2 driver in `ESP32_AudioFFTMono/SpectrumDisplay.ino`. For the 0.96-inch SSD1306 module, replace that constructor with the SSD1306 version:
+
+```cpp
+// 1.3-inch SH1106 (current setting)
+U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+
+// For the 0.96-inch SSD1306, use this instead
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+```
+
+Use only one constructor declaration at a time, then rebuild and upload. Confirm the controller printed on the module or its product documentation; screen size alone does not identify the driver chip.
+
 ### Connection overview
 
 ```text
@@ -83,7 +95,7 @@ INMP441 -- I2S (GPIO2, GPIO3, GPIO4) --> ESP32-C3
                                              |
                                   I2C (GPIO8, GPIO9)
                                              |
-                                      SH1106 OLED
+                                      128x64 I2C OLED
 
 Amplifier speaker output --> speaker
                            (no electrical connection to the ESP32/mic)
@@ -195,7 +207,7 @@ The microphone is mono; the four display modes are visual styles, not separate a
 
 ## Troubleshooting
 
-- **OLED stays blank:** Confirm the display is SH1106, check 3.3 V/GND and SDA GPIO8/SCL GPIO9, and verify the selected board's GPIO assignments.
+- **OLED stays blank:** Confirm the U8g2 constructor matches the OLED controller (SSD1306 or SH1106), check 3.3 V/GND and SDA GPIO8/SCL GPIO9, and verify the selected board's GPIO assignments.
 - **Microphone reads flat or has no signal:** Check VDD/GND, SCK GPIO3, WS GPIO2, SD GPIO4, and L/R. Try changing `I2S_MIC_CHANNEL` from left to right if the module's channel selection differs.
 - **ESP32-C3 will not boot with modules attached:** Review the board's boot-strapping pin requirements, especially GPIO2, GPIO8, and GPIO9, and disconnect external circuitry while testing.
 - **Idle bars flicker:** Keep the mic quiet during calibration, use `c` after stabilizing the setup, increase `NOISE_K` slightly, or increase `DEAD_ZONE` slightly.
