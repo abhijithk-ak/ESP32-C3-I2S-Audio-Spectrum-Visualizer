@@ -234,3 +234,7 @@ The microphone is mono; the four display modes are visual styles, not separate a
 ```
 
 The sketch folder name matches the primary `.ino` filename, so Arduino IDE can open it as a complete sketch after cloning the repository. `.gitignore` excludes generated build artifacts while keeping the source and output photos tracked.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for the full text.
